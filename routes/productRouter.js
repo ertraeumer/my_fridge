@@ -3,8 +3,12 @@ const { Product } = require('../db/models/index');
 
 router.route('/')
   .get(async (req, res) => {
-    const allProducts = await Product.findAll({ raw: true });
-    res.render('content', { allProducts });
+    try {
+      const allProducts = await Product.findAll({ raw: true });
+      res.render('content', { allProducts });
+    } catch (error) {
+      console.log('Ошибка при нахождении продуктов в БД:', error.message);
+    }
   })
   .post(async (req, res) => {
     try {
@@ -16,7 +20,18 @@ router.route('/')
       });
       res.json({ newProduct });
     } catch (error) {
-      console.log(error.message);
+      console.log('Ошибка при создании продукта в БД:', error.message);
+      res.end();
+    }
+  });
+
+router.route('/:id')
+  .delete(async (req, res) => {
+    try {
+      await Product.destroy({ where: { id: req.params.id } });
+      res.end();
+    } catch (error) {
+      console.log('Ошибка при удалении продукта из БД:', error.message);
       res.end();
     }
   });
